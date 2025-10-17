@@ -1,0 +1,293 @@
+import os
+import sqlite3
+from datetime import datetime
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from google.generativeai import configure, GenerativeModel
+from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
+import hashlib
+
+# --- Load environment variables ---
+load_dotenv()
+API_KEY = os.getenv("GEMINI_API_KEY")
+if not API_KEY:
+    raise ValueError("GEMINI_API_KEY not found in .env file")
+
+configure(api_key=API_KEY)
+
+# --- Flask setup ---
+app = Flask(__name__)
+CORS(app)
+
+# --- Upload folders ---
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg"}
+ALLOWED_AUDIO_EXTENSIONS = {"webm", "wav", "mp3"}
+
+DB_FILE = "posts.db"
+
+# --- Utility functions ---
+def allowed_file(filename, allowed_exts):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in allowed_exts
+
+def hash_password(password: str) -> str:
+    """Hash a password for storing in the database"""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def init_db():
+    """Initialize the SQLite DB with users and scheduled_posts"""
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    
+    # Users table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    """)
+    
+    # Scheduled posts table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS scheduled_posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            content TEXT NOT NULL,
+            scheduled_time TEXT NOT NULL,
+            platforms TEXT DEFAULT 'all',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    """)
+    
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# --- Post Generation ---
+def generate_marketing_post(user_text, image_path=None, voice_path=None):
+    try:
+        model = GenerativeModel(model_name="gemini-2.0-flash")
+        prompt = f"""
+        You are a professional social media marketer.
+        Create one single highly engaging post based on this input:
+
+        "{user_text}"
+
+        Guidelines:
+        - Hook the audience immediately
+        - Include emojis where appropriate
+        - Add trending hashtags relevant to the content
+        - Use persuasive and concise wording
+        - Make it ready to post on Instagram, Twitter, Facebook, Threads
+        - Do not give multiple options, only the best single post
+        - Consider image or voice context if provided
+        - The post should grab attention and encourage interaction
+        """
+        contents = [prompt]
+
+        if image_path:
+            contents.append({
+                "mime_type": f"image/{image_path.split('.')[-1]}",
+                "data": open(image_path, "rb").read()
+            })
+
+        if voice_path:
+            contents.append({
+                "mime_type": "audio/webm",
+                "data": open(voice_path, "rb").read()
+            })
+
+        response = model.generate_content(contents)
+        post_text = response.text.strip()
+
+        if not any(char in post_text for char in "😀😃😄😁😆🔥✨🎉💥"):
+            post_text = "🔥 " + post_text + " ✨"
+
+        return {"post": post_text}
+
+    except Exception as e:
+        return {"error": str(e)}
+
+# --- User Registration ---
+@app.route("/register", methods=["POST"])
+def register():
+    try:
+        data = request.get_json()
+        username = data.get("username")
+        email = data.get("email")
+        password = data.get("password")
+
+        if not username or not email or not password:
+            return jsonify({"error": "All fields are required"}), 400
+
+        hashed_password = hash_password(password)
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO users (username, email, password, created_at)
+            VALUES (?, ?, ?, ?)
+        """, (username, email, hashed_password, datetime.now().isoformat()))
+        conn.commit()
+        user_id = cursor.lastrowid
+        conn.close()
+        return jsonify({"success": "User registered successfully", "user_id": user_id})
+    except sqlite3.IntegrityError:
+        return jsonify({"error": "Username or email already exists"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --- User Login ---
+@app.route("/login", methods=["POST"])
+def login():
+    try:
+        data = request.get_json()
+        email = data.get("email")
+        password = data.get("password")
+        if not email or not password:
+            return jsonify({"error": "Email and password required"}), 400
+
+        hashed_password = hash_password(password)
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, username FROM users WHERE email=? AND password=?", (email, hashed_password))
+        user = cursor.fetchone()
+        conn.close()
+
+        if user:
+            user_id, username = user
+            return jsonify({"success": "Login successful", "user_id": user_id, "username": username})
+        else:
+            return jsonify({"error": "Invalid credentials"}), 401
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --- Generate post ---
+@app.route("/generate", methods=["POST"])
+def generate():
+    try:
+        text = request.form.get("text", "").strip()
+        image = request.files.get("image")
+        voice = request.files.get("voice")
+
+        if not text and not voice:
+            return jsonify({"error": "Please provide text or record voice"}), 400
+
+        image_path, voice_path = None, None
+        if image and allowed_file(image.filename, ALLOWED_IMAGE_EXTENSIONS):
+            image_filename = secure_filename(image.filename)
+            image_path = os.path.join(UPLOAD_FOLDER, image_filename)
+            image.save(image_path)
+        if voice and allowed_file(voice.filename, ALLOWED_AUDIO_EXTENSIONS):
+            voice_filename = secure_filename(voice.filename)
+            voice_path = os.path.join(UPLOAD_FOLDER, voice_filename)
+            voice.save(voice_path)
+
+        result = generate_marketing_post(text, image_path=image_path, voice_path=voice_path)
+
+        if image_path and os.path.exists(image_path):
+            os.remove(image_path)
+        if voice_path and os.path.exists(voice_path):
+            os.remove(voice_path)
+
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --- Schedule post ---
+@app.route("/schedule", methods=["POST"])
+def schedule_post():
+    try:
+        data = request.get_json()
+        user_id = data.get("user_id")
+        content = data.get("content")
+        scheduled_time = data.get("scheduled_time")
+        platforms = data.get("platforms", "all")
+
+        if not user_id:
+            return jsonify({"error": "User not logged in"}), 401
+        if not content or not scheduled_time:
+            return jsonify({"error": "Content and scheduled_time are required"}), 400
+
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO scheduled_posts (user_id, content, scheduled_time, platforms, created_at)
+            VALUES (?, ?, ?, ?, ?)
+        """, (user_id, content, scheduled_time, platforms, datetime.now().isoformat()))
+        conn.commit()
+        conn.close()
+        return jsonify({"success": "Post scheduled successfully"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --- Get scheduled posts ---
+@app.route("/scheduled_posts", methods=["GET"])
+def get_scheduled_posts():
+    try:
+        user_id = request.args.get("user_id")
+        if not user_id:
+            return jsonify({"error": "User ID is required"}), 401
+
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, content, scheduled_time, platforms, created_at
+            FROM scheduled_posts
+            WHERE user_id=?
+            ORDER BY scheduled_time ASC
+        """, (user_id,))
+        posts = cursor.fetchall()
+        conn.close()
+        result = [{"id": p[0], "content": p[1], "scheduled_time": p[2], "platforms": p[3], "created_at": p[4]} for p in posts]
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --- Delete scheduled post ---
+@app.route("/scheduled_posts/<int:post_id>", methods=["DELETE"])
+def delete_scheduled_post(post_id):
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM scheduled_posts WHERE id=?", (post_id,))
+        conn.commit()
+        conn.close()
+        return jsonify({"success": "Scheduled post deleted"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# --- Automatic posting ---
+def post_scheduled_content():
+    try:
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        now = datetime.now().isoformat()
+        cursor.execute("SELECT id, user_id, content, platforms FROM scheduled_posts WHERE scheduled_time <= ?", (now,))
+        posts_to_post = cursor.fetchall()
+        for post in posts_to_post:
+            post_id, user_id, content, platforms = post
+            print(f"[AUTO POST] User: {user_id} | Platforms: {platforms} | Content: {content}")
+            cursor.execute("DELETE FROM scheduled_posts WHERE id=?", (post_id,))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"[SCHEDULER ERROR] {e}")
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(post_scheduled_content, 'interval', seconds=30)
+scheduler.start()
+atexit.register(lambda: scheduler.shutdown())
+
+# --- Run server ---
+if __name__ == "__main__":
+    app.run(debug=True)

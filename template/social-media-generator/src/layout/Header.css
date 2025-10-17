@@ -1,0 +1,127 @@
+:root {
+  --primary-color: #16a34a;
+  --secondary-color: #34d399;
+  --white: #ffffff;
+  --text-dark: #1e1e1e;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+/* 🌟 Header Container */
+.main-header {
+  width: 100%;
+  background-color: var(--white);
+  color: var(--text-dark);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 50px;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.4s ease;
+  opacity: 0;
+  animation: fadeIn 1s forwards;
+}
+
+/* 🧠 Logo */
+.logo {
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.1);
+  color: var(--secondary-color);
+}
+
+/* 🧭 Navigation */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+/* Animate navigation items */
+.animate-nav .nav-item,
+.animate-nav .btn-get-started {
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: slideFadeIn 0.6s forwards;
+}
+
+.animate-nav .nav-item:nth-child(1) { animation-delay: 0.3s; }
+.animate-nav .nav-item:nth-child(2) { animation-delay: 0.5s; }
+.animate-nav .btn-get-started { animation-delay: 0.7s; }
+
+.nav-item {
+  text-decoration: none;
+  color: var(--text-dark);
+  font-weight: 500;
+  font-size: 1rem;
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.nav-item:hover {
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+/* 🚀 Get Started Button */
+.btn-get-started {
+  background-color: var(--primary-color);
+  color: var(--white);
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 10px var(--shadow-color);
+}
+
+.btn-get-started:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 15px var(--shadow-color);
+}
+
+/* 📱 Responsive */
+@media (max-width: 768px) {
+  .main-header {
+    flex-direction: column;
+    padding: 14px 25px;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-get-started {
+    width: 100%;
+    padding: 12px;
+  }
+}
+
+/* ================= Animations ================= */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

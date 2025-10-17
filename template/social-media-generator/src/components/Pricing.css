@@ -1,0 +1,126 @@
+:root {
+  --primary-color: #16a34a;
+  --secondary-color: #34d399;
+  --white: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --text-dark: #1e1e1e;
+  --card-bg: #ffffff;
+}
+
+.pricing-page {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.pricing-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.pricing-subtitle {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 40px;
+}
+
+/* 🃏 Pricing cards container */
+.pricing-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+}
+
+/* 💳 Individual card */
+.card {
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 8px 30px var(--shadow-color);
+  padding: 30px 20px;
+  width: 280px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px var(--shadow-color);
+}
+
+.card h3 {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.card .price {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.card ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 25px;
+  text-align: left;
+}
+
+.card ul li {
+  margin: 8px 0;
+  color: #555;
+  position: relative;
+  padding-left: 20px;
+}
+
+.card ul li::before {
+  content: "✔";
+  color: var(--primary-color);
+  position: absolute;
+  left: 0;
+}
+
+/* 💚 Buttons */
+.btn {
+  background-color: var(--primary-color);
+  color: var(--white);
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  border: none;
+}
+
+.btn:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+/* 🔹 Highlighted cards */
+.card-pro {
+  border: 2px solid var(--primary-color);
+}
+
+.card-premium {
+  border: 2px solid var(--secondary-color);
+}
+
+/* 📱 Responsive */
+@media (max-width: 900px) {
+  .pricing-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+  .card {
+    width: 90%;
+  }
+}
