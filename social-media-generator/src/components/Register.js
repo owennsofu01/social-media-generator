@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Register.css";
 
-const backendUrl = "http://127.0.0.1:5000/register";
+const backendUrl = "https://social-media-generator-jhsl.onrender.com/register";
 
 const Register = () => {
   const navigate = useNavigate();

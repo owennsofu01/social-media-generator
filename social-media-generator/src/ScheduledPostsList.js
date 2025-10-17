@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const scheduledPostsUrl = "http://127.0.0.1:5000/scheduled_posts";
+const scheduledPostsUrl = "https://social-media-generator-jhsl.onrender.com/scheduled_posts";
 
 const ScheduledPostsList = () => {
   const [scheduledPosts, setScheduledPosts] = useState([]);

@@ -15,8 +15,8 @@ import ScheduledPostsList from "../ScheduledPostsList";
 import { useNavigate } from "react-router-dom";
 import "./PostGenerator.css";
 
-const backendUrl = "http://127.0.0.1:5000/generate";
-const scheduleUrl = "http://127.0.0.1:5000/schedule";
+const backendUrl = "https://social-media-generator-jhsl.onrender.com/generate";
+const scheduleUrl = "https://social-media-generator-jhsl.onrender.com/schedule";
 
 const PostGenerator = () => {
   const navigate = useNavigate();
