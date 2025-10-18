@@ -49,3 +49,23 @@ def get_scheduled_posts():
     result = [{"id": p["id"], "content": p["content"], "scheduled_time": p["scheduled_time"],
                "platforms": p["platforms"], "created_at": p["created_at"]} for p in posts]
     return jsonify(result)
+
+@scheduled_bp.route("/scheduled_posts", methods=["DELETE"])
+def delete_scheduled_post():
+    data = request.get_json()
+    post_id = data.get("id")
+
+    if not post_id:
+        return jsonify({"error": "Post ID is required"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM scheduled_posts WHERE id=?", (post_id,))
+    conn.commit()
+    deleted = cursor.rowcount  # number of rows deleted
+    conn.close()
+
+    if deleted:
+        return jsonify({"success": "Post deleted successfully"})
+    else:
+        return jsonify({"error": "Post not found"}), 404

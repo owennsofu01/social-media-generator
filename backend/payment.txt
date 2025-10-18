@@ -1,0 +1,44 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import stripe
+import os
+
+# Load environment variables if you have them in .env
+# from dotenv import load_dotenv
+# load_dotenv()
+
+app = Flask(__name__)
+CORS(app)  # Enable CORS for React frontend
+
+# Stripe secret key
+stripe.api_key = "sk_test_YOUR_SECRET_KEY"  # Replace with your Stripe Secret Key
+
+# Replace with your actual Stripe Price IDs
+PRICE_IDS = {
+    "basic": "price_123",
+    "pro": "price_456",
+    "premium": "price_789",
+}
+
+@app.route("/create-checkout-session", methods=["POST"])
+def create_checkout_session():
+    data = request.get_json()
+    plan = data.get("plan")
+
+    if plan not in PRICE_IDS:
+        return jsonify({"error": "Invalid plan selected"}), 400
+
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{"price": PRICE_IDS[plan], "quantity": 1}],
+            mode="subscription",
+            success_url="http://localhost:3000/success",
+            cancel_url="http://localhost:3000/cancel",
+        )
+        return jsonify({"url": session.url})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
+if __name__ == "__main__":
+    app.run(port=5000)
