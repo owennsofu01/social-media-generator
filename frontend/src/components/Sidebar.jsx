@@ -1,84 +1,32 @@
-import React, { useState, useEffect } from "react";
-import { FaTrash, FaPlus, FaSearch, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+// src/components/Sidebar.js
+import React, { useEffect, useState } from "react";
 
+const Sidebar = () => {
+  const [user, setUser] = useState(null);
 
-const Sidebar = ({ chats, setChats, setPostResult }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  // ✅ When sidebar opens, create a new chat automatically
   useEffect(() => {
-    if (sidebarOpen) {
-      const newChat = { id: Date.now(), content: "" };
-      setChats((prev) => {
-        const updated = [newChat, ...prev];
-        localStorage.setItem("myChats", JSON.stringify(updated));
-        return updated;
-      });
-      setPostResult(""); // clear post generator
+    const userData = localStorage.getItem("user_profile");
+    if (userData) {
+      setUser(JSON.parse(userData));
     }
-  }, [sidebarOpen, setChats, setPostResult]);
+  }, []);
 
-  const deleteChat = (id) => {
-    const updated = chats.filter((c) => c.id !== id);
-    setChats(updated);
-    localStorage.setItem("myChats", JSON.stringify(updated));
-  };
-
-  const filteredChats = chats?.filter((c) =>
-    c.content.toLowerCase().includes(searchQuery.toLowerCase())
-  ) || [];
+  if (!user) return null;
 
   return (
-    <div
-      className={`sidebar ${sidebarOpen ? "open" : "collapsed"}`}
-      style={{
-        width: sidebarOpen ? 300 : 60,
-        minWidth: sidebarOpen ? 300 : 60,
-      }}
-    >
-      <button className="toggle-sidebar" onClick={() => setSidebarOpen(!sidebarOpen)}>
-        {sidebarOpen ? <FaChevronLeft /> : <FaChevronRight />}
-      </button>
-
-      <div className="sidebar-header">
-        {sidebarOpen && <h3>My Chats</h3>}
-        {sidebarOpen && (
-          <button className="new-chat-btn" onClick={() => setPostResult("")}>
-            <FaPlus /> New
-          </button>
-        )}
+    <div className="w-64 bg-white shadow-lg rounded-2xl p-6 sticky top-4 h-fit">
+      <div className="flex flex-col items-center text-center">
+        <img
+          src={user.avatar || "/default-avatar.png"}
+          alt="Profile"
+          className="w-24 h-24 rounded-full mb-4 object-cover"
+        />
+        <h3 className="text-xl font-semibold text-[#231F20]">{user.name}</h3>
+        <p className="text-gray-600">{user.email}</p>
       </div>
-
-      <div className="search-chat">
-        <FaSearch />
-        {sidebarOpen && (
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        )}
-      </div>
-
-      <div className="chat-list">
-        {filteredChats.length > 0 ? (
-          filteredChats.map((c) => (
-            <div key={c.id} className="chat-item">
-              {sidebarOpen && (
-                <p onClick={() => setPostResult(c.content)}>
-                  {c.content || "New Chat..."}
-                </p>
-              )}
-              <button onClick={() => deleteChat(c.id)}>
-                <FaTrash />
-              </button>
-            </div>
-          ))
-        ) : (
-          sidebarOpen && <p className="no-chat">No chats found</p>
-        )}
+      <div className="mt-6">
+        <h4 className="font-semibold text-gray-700 mb-2">Subscription:</h4>
+        <p className="text-[#AD974F] font-bold">{user.subscription || "Free"}</p>
       </div>
     </div>
   );
