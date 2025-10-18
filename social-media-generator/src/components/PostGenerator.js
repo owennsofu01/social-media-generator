@@ -158,87 +158,111 @@ const PostGenerator = () => {
         <div className="container">
           <div className="header">
             <MdGraphicEq size={28} style={{ marginRight: 8 }} />
-            Social Media Post Generator
+            AI Social Media Content Generator
           </div>
 
-          {/* 📝 Generated Post */}
-          <div className="result">
-            <h3>Generated Post:</h3>
-            {loading ? <p>Loading...</p> : <p>{postResult}</p>}
-          </div>
+          {/* ======================================= */}
+          {/* Section 1: Content Input and Generation */}
+          {/* ======================================= */}
+          <div className="section-panel input-section">
+            <h2 className="section-title">1. Create Content</h2>
+            <p className="section-description">Provide text, an image, or a voice recording to generate your marketing post.</p>
 
-          {/* ✍️ Input Section */}
-          <div className="inputs">
-            <div className="inline-inputs">
-              <input
-                type="text"
-                placeholder="Type your text here..."
-                value={userText}
-                onChange={(e) => setUserText(e.target.value)}
-              />
-              <label htmlFor="file-upload" className="file-label">
-                <FaUpload />
-              </label>
-              <input
-                id="file-upload"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImageFile(e.target.files[0])}
-                style={{ display: "none" }}
-              />
-              <button
-                className={`record-btn ${isRecording ? "recording" : ""}`}
-                onClick={handleRecord}
-              >
-                {isRecording ? <FaStop /> : <FaMicrophone />}
+            <div className="inputs">
+              <div className="inline-inputs">
+                <input
+                  type="text"
+                  placeholder="Type your content idea, topic, or prompt..."
+                  value={userText}
+                  onChange={(e) => setUserText(e.target.value)}
+                />
+
+                <label htmlFor="file-upload" className="file-label" title="Upload Image">
+                  <FaUpload />
+                </label>
+                <input
+                  id="file-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files[0])}
+                  style={{ display: "none" }}
+                />
+
+                <button
+                  className={`record-btn ${isRecording ? "recording" : ""}`}
+                  onClick={handleRecord}
+                  title={isRecording ? "Stop Recording" : "Start Voice Recording"}
+                >
+                  {isRecording ? <FaStop /> : <FaMicrophone />}
+                </button>
+              </div>
+
+              {imageFile && <p className="file-status">🖼️ **File attached:** {imageFile.name}</p>}
+              {recordStatus && <p className="record-status">{recordStatus}</p>}
+
+              <button className="generate-btn" onClick={handleGenerate} disabled={loading}>
+                <FaMagic style={{ marginRight: 8 }} /> {loading ? "Generating..." : "Generate Professional Post"}
               </button>
             </div>
-
-            {recordStatus && <p className="record-status">{recordStatus}</p>}
-
-            <button className="generate-btn" onClick={handleGenerate}>
-              <FaMagic style={{ marginRight: 8 }} /> Generate Post
-            </button>
           </div>
 
-          {/* ⏰ Schedule Post */}
-          {postResult && !loading && (
-            <div className="schedule-post">
-              <h3>Schedule Post</h3>
-              <input
-                type="datetime-local"
-                value={scheduledTime}
-                onChange={(e) => setScheduledTime(e.target.value)}
-              />
-              <button onClick={handleSchedule}>Schedule Post</button>
-            </div>
-          )}
+          {/* ======================================= */}
+          {/* Section 2: Review and Action */}
+          {/* ======================================= */}
+          {postResult && (
+            <div className="section-panel result-section">
+              <h2 className="section-title">2. Review & Deploy</h2>
 
-          {/* 🌍 Share Buttons */}
-          {postResult && !loading && (
-            <div className="share-section">
-              <h3>Share on Social Media</h3>
-              <div className="share-buttons">
-                <button onClick={() => sharePost("facebook")}>
-                  <FaFacebook /> Facebook
-                </button>
-                <button onClick={() => sharePost("x")}>
-                  <FaTwitter /> X / Twitter
-                </button>
-                <button onClick={() => sharePost("linkedin")}>
-                  <FaLinkedin /> LinkedIn
-                </button>
-                <button onClick={() => sharePost("instagram")}>
-                  <FaInstagram /> Instagram
-                </button>
-                <button onClick={() => sharePost("threads")}>
-                  <SiThreads /> Threads
-                </button>
+              {/* Generated Post Display */}
+              <div className="result">
+                <h3>Generated Post Preview:</h3>
+                {loading ? <p>Loading...</p> : <p>{postResult}</p>}
+              </div>
+              
+              <div className="post-actions">
+                {/* Schedule Post */}
+                <div className="schedule-post">
+                  <h4>🗓️ Schedule Post</h4>
+                  <input
+                    type="datetime-local"
+                    value={scheduledTime}
+                    onChange={(e) => setScheduledTime(e.target.value)}
+                  />
+                  <button onClick={handleSchedule} disabled={!scheduledTime}>Schedule Post</button>
+                </div>
+
+                {/* Share Buttons */}
+                <div className="share-section">
+                  <h4>🌐 Share Directly</h4>
+                  <div className="share-buttons">
+                    <button onClick={() => sharePost("x")} title="Share on X/Twitter">
+                      <FaTwitter /> X / Twitter
+                    </button>
+                    <button onClick={() => sharePost("linkedin")} title="Share on LinkedIn">
+                      <FaLinkedin /> LinkedIn
+                    </button>
+                    <button onClick={() => sharePost("facebook")} title="Share on Facebook">
+                      <FaFacebook /> Facebook
+                    </button>
+                    <button onClick={() => sharePost("instagram")} title="Share on Instagram (Manual Copy)">
+                      <FaInstagram /> Instagram
+                    </button>
+                    <button onClick={() => sharePost("threads")} title="Share on Threads (Manual Copy)">
+                      <SiThreads /> Threads
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          <ScheduledPostsList />
+          {/* ======================================= */}
+          {/* Section 3: Scheduled Posts List */}
+          {/* ======================================= */}
+          <div className="section-panel list-section">
+            <h2 className="section-title">3. Scheduled Posts</h2>
+            <ScheduledPostsList />
+          </div>
         </div>
       </div>
     </div>
