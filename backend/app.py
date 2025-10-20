@@ -17,7 +17,7 @@ app = Flask(__name__)
 CORS(app)
 
 # --- Initialize Firebase (Firestore only) ---
-cred_path = os.getenv("FIREBASE_CREDENTIALS", "firebase_key.json")
+cred_path = os.getenv("FIREBASE_KEY_JSON", "firebase_key.json")
 if not os.path.exists(cred_path):
     raise FileNotFoundError(f"Firebase credentials file not found: {cred_path}")
 
