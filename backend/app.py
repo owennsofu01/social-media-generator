@@ -1,12 +1,9 @@
 import os
-import json
 from flask import Flask
 from flask_cors import CORS
-import firebase_admin
-from firebase_admin import credentials, firestore
+from dotenv import load_dotenv
 
 # --- Load environment variables ---
-from dotenv import load_dotenv
 load_dotenv()
 
 API_KEY = os.getenv("GEMINI_API_KEY")
@@ -17,23 +14,8 @@ if not API_KEY:
 app = Flask(__name__)
 CORS(app)
 
-# --- Initialize Firebase using JSON content from environment variable ---
-firebase_key_json = os.getenv("FIREBASE_KEY_JSON")
-
-if firebase_key_json:
-    cred_dict = json.loads(firebase_key_json)
-    cred = credentials.Certificate(cred_dict)
-else:
-    # fallback to local file
-    cred_path = "firebase_key.json"
-    if not os.path.exists(cred_path):
-        raise FileNotFoundError(f"Firebase credentials file not found: {cred_path}")
-    cred = credentials.Certificate(cred_path)
-
-if not firebase_admin._apps:
-    firebase_admin.initialize_app(cred)
-
-db = firestore.client()
+# --- Import Firebase (db is Firestore client) ---
+from firebase_init import db
 
 # --- Ensure uploads folder exists ---
 UPLOAD_FOLDER = "uploads"
