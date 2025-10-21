@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 # --------------------------
 # Load environment variables (local dev)
 # --------------------------
-load_dotenv()  # Loads .env locally
+load_dotenv()
 
 # --------------------------
 # Required env variables
@@ -19,7 +19,14 @@ if not API_KEY:
 # Initialize Flask
 # --------------------------
 app = Flask(__name__)
-CORS(app)
+
+# --- CORS FIX: Explicitly specify the front-end origin ---
+# This tells the browser on netlify.app that it is allowed to talk to the
+# render.com backend.
+CORS(app, resources={r"/*": {"origins": [
+    "https://hilarious-palmier-3f3412.netlify.app", 
+    "http://localhost:3000" # Include localhost for local testing
+]}})
 
 # --------------------------
 # Ensure uploads folder exists
@@ -41,7 +48,7 @@ app.register_blueprint(scheduled_bp)
 # --------------------------
 # Start Scheduler (background jobs)
 # --------------------------
-import scheduler  # Auto-posting background job
+import scheduler 
 
 # --------------------------
 # Root endpoint
@@ -54,5 +61,5 @@ def index():
 # Run Flask
 # --------------------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Render sets PORT
+    port = int(os.environ.get("PORT", 5000)) 
     app.run(host="0.0.0.0", port=port)
