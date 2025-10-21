@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "../../layout/Sidebar"; // include Sidebar
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import ScheduleModal from "./ScheduleModal";
@@ -135,9 +136,13 @@ const PostGenerator = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-[#F7F7F8]">
-      {/* Chat area */}
-      <div className="flex-1 flex flex-col">
+    <div className="flex h-screen bg-[#F7F7F8]">
+      {/* Sidebar */}
+      
+
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col md:pl-64">
+        {/* Chat messages */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 flex flex-col gap-4">
           {messages.map((msg, i) => (
             <ChatMessage
@@ -154,7 +159,7 @@ const PostGenerator = () => {
           )}
         </div>
 
-        {/* Chat input fixed on bottom */}
+        {/* Chat input fixed at bottom */}
         <div className="sticky bottom-0 bg-white border-t z-10">
           <ChatInput
             inputText={inputText}
@@ -167,7 +172,7 @@ const PostGenerator = () => {
         </div>
       </div>
 
-      {/* Schedule Modal */}
+      {/* Schedule modal */}
       <ScheduleModal
         modalOpen={modalOpen}
         setModalOpen={setModalOpen}

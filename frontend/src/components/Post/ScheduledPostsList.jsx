@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../layout/Sidebar";
 
 const scheduledPostsUrl = "https://social-media-generator-jhsl.onrender.com/scheduled_posts";
@@ -42,10 +42,10 @@ const ScheduledPostsList = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 p-4 md:p-6">
-    
+    <div className="flex h-screen bg-[#F7F7F8]">
+      
 
-      <div className="flex-1 bg-white p-4 md:p-6 rounded-2xl shadow space-y-4 overflow-x-auto">
+      <div className="flex-1 md:pl-64 p-4 md:p-6 overflow-x-auto">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
           <h3 className="text-xl font-semibold text-[#231F20]">📅 My Scheduled Posts</h3>
           <button
