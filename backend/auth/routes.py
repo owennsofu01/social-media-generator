@@ -1,6 +1,8 @@
 from flask import Blueprint, request, jsonify
-from firebase_init import auth, db
+
 from datetime import datetime
+from firebase_init import auth_instance as auth, db
+
 
 auth_bp = Blueprint("auth", __name__)
 

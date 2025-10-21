@@ -1,42 +1,19 @@
 import os
-import json
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
-import firebase_admin
-from firebase_admin import credentials, firestore
 
 # --------------------------
-# Load local environment variables (for development)
+# Load environment variables (local dev)
 # --------------------------
-load_dotenv()  # Will load .env file locally
+load_dotenv()  # Loads .env locally
 
 # --------------------------
-# Required environment variables
+# Required env variables
 # --------------------------
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
-
-FIREBASE_CREDENTIALS = os.getenv("FIREBASE_CREDENTIALS")
-
-# --------------------------
-# Initialize Firebase (Firestore)
-# --------------------------
-if not firebase_admin._apps:
-    if FIREBASE_CREDENTIALS and FIREBASE_CREDENTIALS.strip().startswith("{"):
-        # Load from environment variable (Render)
-        cred_dict = json.loads(FIREBASE_CREDENTIALS)
-        cred = credentials.Certificate(cred_dict)
-    else:
-        # Local fallback to file
-        cred_path = FIREBASE_CREDENTIALS or "firebase_key.json"
-        if not os.path.exists(cred_path):
-            raise FileNotFoundError(f"Firebase credentials file not found: {cred_path}")
-        cred = credentials.Certificate(cred_path)
-    firebase_admin.initialize_app(cred)
-
-db = firestore.client()
 
 # --------------------------
 # Initialize Flask
