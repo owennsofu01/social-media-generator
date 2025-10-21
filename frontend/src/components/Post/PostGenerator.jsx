@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../../layout/Sidebar"; // include Sidebar
+
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import ScheduleModal from "./ScheduleModal";

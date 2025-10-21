@@ -23,10 +23,13 @@ app = Flask(__name__)
 # --- CORS FIX: Explicitly specify the front-end origin ---
 # This tells the browser on netlify.app that it is allowed to talk to the
 # render.com backend.
+# --- CORS FIX: Explicitly specify the front-end origin ---
 CORS(app, resources={r"/*": {"origins": [
     "https://hilarious-palmier-3f3412.netlify.app", 
-    "http://localhost:3000" # Include localhost for local testing
+    "http://localhost:5173",   # ✅ Corrected for Vite
+    "http://localhost:3000"    # (Optional: keep if you ever use CRA)
 ]}})
+
 
 # --------------------------
 # Ensure uploads folder exists
