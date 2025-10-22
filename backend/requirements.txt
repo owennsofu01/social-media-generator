@@ -11,9 +11,11 @@ charset-normalizer==3.4.4
 click==8.3.0
 colorama==0.4.6
 cryptography==46.0.3
+filelock==3.20.0
 firebase_admin==7.1.0
 Flask==3.1.2
 flask-cors==6.0.1
+fsspec==2025.9.0
 git-filter-repo==2.47.0
 google-ai-generativelanguage==0.6.15
 google-api-core==2.26.0
@@ -22,6 +24,7 @@ google-auth==2.41.1
 google-auth-httplib2==0.2.0
 google-cloud-core==2.4.3
 google-cloud-firestore==2.21.0
+google-cloud-speech==2.34.0
 google-cloud-storage==3.4.1
 google-crc32c==1.7.1
 google-genai==1.45.0
@@ -41,8 +44,14 @@ hyperframe==6.1.0
 idna==3.11
 itsdangerous==2.2.0
 Jinja2==3.1.6
+llvmlite==0.45.1
 MarkupSafe==3.0.3
+more-itertools==10.8.0
+mpmath==1.3.0
 msgpack==1.1.2
+networkx==3.5
+numba==0.62.1
+numpy==2.3.4
 packaging==25.0
 proto-plus==1.26.1
 protobuf==5.29.5
@@ -56,13 +65,16 @@ pydub==0.25.1
 PyJWT==2.10.1
 pyparsing==3.2.5
 python-dotenv==1.1.1
+regex==2025.10.23
 requests==2.32.5
 rsa==4.9.1
+setuptools==80.9.0
 sniffio==1.3.1
 SpeechRecognition==3.14.3
 standard-aifc==3.13.0
 standard-chunk==3.13.0
 stripe==13.0.1
+sympy==1.14.0
 tenacity==9.1.2
 tqdm==4.67.1
 typing-inspection==0.4.2
@@ -73,3 +85,4 @@ uritemplate==4.2.0
 urllib3==2.5.0
 websockets==15.0.1
 Werkzeug==3.1.3
+wheel==0.45.1
