@@ -5,8 +5,8 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import ScheduleModal from "./ScheduleModal";
 
-const backendUrl = "https://social-media-generator-jhsl.onrender.com/generate";
-const scheduleUrl = "https://social-media-generator-jhsl.onrender.com/schedule";
+const backendUrl = "http://127.0.0.1:5000/generate";
+const scheduleUrl = "http://127.0.0.1:5000/schedule";
 
 const PostGenerator = () => {
   const navigate = useNavigate();

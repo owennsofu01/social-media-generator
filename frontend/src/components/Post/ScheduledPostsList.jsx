@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../layout/Sidebar";
 
-const scheduledPostsUrl = "https://social-media-generator-jhsl.onrender.com/scheduled_posts";
+const scheduledPostsUrl = "http://127.0.0.1:5000/scheduled_posts";
 
 const ScheduledPostsList = () => {
   const [scheduledPosts, setScheduledPosts] = useState([]);
