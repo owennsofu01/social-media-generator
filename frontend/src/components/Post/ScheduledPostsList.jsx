@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaTrashAlt, FaRedoAlt } from "react-icons/fa"; 
 // import Sidebar from "../../layout/Sidebar"; // Assuming Sidebar is handled externally
 
-const scheduledPostsUrl = "http://127.0.0.1:5000/scheduled_posts";
+const scheduledPostsUrl = "https://social-media-generator-jhsl.onrender.com/scheduled_posts";
 
 const ScheduledPostsList = () => {
     const [scheduledPosts, setScheduledPosts] = useState([]);

@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 import { benefits } from "../Data/benefitsData.jsx";
 

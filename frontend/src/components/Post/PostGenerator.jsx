@@ -7,8 +7,8 @@ import ChatInput from "./ChatInput";
 import ScheduleModal from "./ScheduleModal";
 import { FaTimesCircle } from "react-icons/fa";
 
-const backendUrl = "http://127.0.0.1:5000/generate";
-const scheduleUrl = "http://127.0.0.1:5000/schedule";
+const backendUrl = "https://social-media-generator-jhsl.onrender.com/generate";
+const scheduleUrl = "https://social-media-generator-jhsl.onrender.com/schedule";
 
 // Simple Notification/Toast Component
 const Notification = ({ message, type, onClose }) => {

@@ -3,6 +3,7 @@ import HeroSection from "./HeroSection";
 import BenefitsSection from "./BenefitsSection";
 import TestimonialsSection from "./TestimonialsSection";
 import CTASection from "./CTASection";
+import { motion } from "framer-motion";
 
 const Home = () => (
   <div className="home-page">
