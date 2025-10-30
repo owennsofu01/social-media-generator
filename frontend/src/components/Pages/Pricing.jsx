@@ -1,5 +1,29 @@
 import React from "react";
-import { motion } from "framer-motion";
+
+
+// Define animation variants for the grid container
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.15, // Delay between each card's animation start
+    },
+  },
+};
+
+// Define animation variants for each individual plan card
+const itemVariants = {
+  hidden: { y: 50, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+    },
+  },
+};
 
 const plans = [
   {
@@ -40,46 +64,73 @@ const plans = [
 
 const Pricing = () => {
   return (
-    <section className="bg-[#EAEAEA] min-h-screen py-16 px-6 md:px-10">
+    <section className="bg-gray-50 min-h-screen py-20 px-6 md:px-10">
       <motion.div
         className="max-w-6xl mx-auto text-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 20 }} // Update the main header block to animate slightly
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <h2 className="text-4xl font-bold text-[#231F20] mb-8">
-          Pricing Plans
+        <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
+          Simple, Transparent <span className="text-blue-600">Pricing Plans</span>
         </h2>
-        <p className="text-gray-700 mb-12 max-w-2xl mx-auto">
+        <p className="text-gray-600 mb-12 max-w-2xl mx-auto text-lg">
           Choose a plan that fits your social media needs. Upgrade anytime to unlock more features.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* This motion.div now controls the staggered scroll-in animation */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
           {plans.map((plan, idx) => (
             <motion.div
               key={idx}
-              className="bg-white rounded-2xl shadow-md p-8 hover:shadow-xl transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
+              className={`rounded-3xl shadow-xl p-8 transition-all duration-500 flex flex-col ${
+                idx === 1
+                  ? "bg-blue-600 text-white transform scale-[1.02]" // Highlighted Pro plan
+                  : "bg-white hover:shadow-2xl"
+              }`}
+              whileHover={{ scale: idx === 1 ? 1.05 : 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              variants={itemVariants} // Apply the item animation for stagger effect
             >
-              <h3 className="text-2xl font-semibold text-[#231F20] mb-4">
+              <h3 className={`text-3xl font-bold mb-2 ${idx !== 1 ? "text-gray-900" : "text-white"}`}>
                 {plan.title}
               </h3>
-              <p className="text-3xl font-bold text-[#8E793E] mb-6">
+              <p className={`text-4xl font-extrabold mb-6 ${idx !== 1 ? "text-blue-600" : "text-white"}`}>
                 {plan.price}
               </p>
-              <ul className="text-gray-700 mb-6 space-y-2 text-left">
+
+              <ul className="mb-8 space-y-3 text-left flex-grow">
                 {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <span className="text-[#AD974F] font-bold">✔</span> {feature}
+                  <li key={i} className={`flex items-start gap-3 ${idx !== 1 ? "text-gray-700" : "text-blue-100"}`}>
+                    <span className={`flex-shrink-0 text-xl ${idx !== 1 ? "text-blue-500" : "text-blue-100"}`}>
+                      {/* Using Lucide React icons with a small fallback SVG if not available */}
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check-circle-2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                    </span>
+                    {feature}
                   </li>
                 ))}
               </ul>
-              <button className="bg-[#AD974F] hover:bg-[#8E793E] text-white font-semibold px-6 py-2 rounded-full w-full">
+
+              <motion.button 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`font-semibold px-8 py-3 rounded-xl w-full text-lg transition-all duration-300 shadow-md ${
+                  idx === 1
+                    ? "bg-white text-blue-600 hover:bg-blue-50/90" // Highlighted button
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+              >
                 Choose Plan
-              </button>
+              </motion.button>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </motion.div>
     </section>
   );

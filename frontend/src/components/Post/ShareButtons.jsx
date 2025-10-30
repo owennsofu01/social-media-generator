@@ -2,10 +2,11 @@ import React from "react";
 import { FaTwitter, FaLinkedin, FaFacebook, FaInstagram } from "react-icons/fa";
 import { SiThreads } from "react-icons/si";
 
-const ShareButtons = ({ text }) => {
-  const url = encodeURIComponent("https://example.com"); // your link
-  const content = encodeURIComponent(text);
-  const iconSize = 20; // base icon size
+const ShareButtons = ({ post }) => {
+  if (!post) return null;
+
+  const url = encodeURIComponent(post.url || window.location.href);
+  const content = encodeURIComponent(post.title || "");
 
   const shareToPlatform = (platform) => {
     switch (platform) {
@@ -16,22 +17,40 @@ const ShareButtons = ({ text }) => {
         window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, "_blank");
         break;
       case "facebook":
-        alert("Facebook only shares URLs. Copy manually.");
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank");
         break;
       case "instagram":
       case "threads":
-        alert("Copy post manually for this platform.");
+        // Since Instagram and Threads don't have direct sharing APIs for text/images,
+        // we'll prompt the user and copy the text for them.
+        navigator.clipboard.writeText(post.title);
+        alert(`Content copied! Open ${platform} to paste manually.`);
         break;
       default:
         alert("Unknown platform");
     }
   };
 
+  // Standard size for action icons
+  const iconSize = 18;
+  
+  // Unified style for all share buttons: subtle background, primary color on hover
+  const baseButtonClass = "p-2 rounded-full transition duration-150 text-gray-500 hover:text-white hover:bg-blue-600";
+
+  // Use platform-specific colors only for the hover effect, for a splash of recognition
+  const platformHoverColors = {
+      x: "hover:bg-black",
+      linkedin: "hover:bg-blue-700",
+      facebook: "hover:bg-blue-600",
+      instagram: "hover:bg-pink-600",
+      threads: "hover:bg-black",
+  };
+
   return (
-    <div className="flex flex-wrap gap-2 mt-2">
+    <div className="flex gap-2"> {/* Removed mt-2 since the parent (ChatMessage) handles the vertical spacing */}
       <button
         onClick={() => shareToPlatform("x")}
-        className="text-blue-500 hover:text-blue-700 p-2 rounded"
+        className={`${baseButtonClass} ${platformHoverColors.x}`}
         title="Share on X / Twitter"
       >
         <FaTwitter size={iconSize} />
@@ -39,7 +58,7 @@ const ShareButtons = ({ text }) => {
 
       <button
         onClick={() => shareToPlatform("linkedin")}
-        className="text-blue-700 hover:text-blue-900 p-2 rounded"
+        className={`${baseButtonClass} ${platformHoverColors.linkedin}`}
         title="Share on LinkedIn"
       >
         <FaLinkedin size={iconSize} />
@@ -47,7 +66,7 @@ const ShareButtons = ({ text }) => {
 
       <button
         onClick={() => shareToPlatform("facebook")}
-        className="text-blue-600 hover:text-blue-800 p-2 rounded"
+        className={`${baseButtonClass} ${platformHoverColors.facebook}`}
         title="Share on Facebook"
       >
         <FaFacebook size={iconSize} />
@@ -55,16 +74,16 @@ const ShareButtons = ({ text }) => {
 
       <button
         onClick={() => shareToPlatform("instagram")}
-        className="text-pink-500 hover:text-pink-700 p-2 rounded"
-        title="Share on Instagram"
+        className={`${baseButtonClass} ${platformHoverColors.instagram}`}
+        title="Share on Instagram (Copies text to clipboard)"
       >
         <FaInstagram size={iconSize} />
       </button>
 
       <button
         onClick={() => shareToPlatform("threads")}
-        className="text-gray-700 hover:text-gray-900 p-2 rounded"
-        title="Share on Threads"
+        className={`${baseButtonClass} ${platformHoverColors.threads}`}
+        title="Share on Threads (Copies text to clipboard)"
       >
         <SiThreads size={iconSize} />
       </button>

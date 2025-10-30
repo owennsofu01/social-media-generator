@@ -1,34 +1,26 @@
 import os
 import traceback
 import google.generativeai as genai
+import base64
+import openai  # for image generation
 
-# ✅ Try Whisper fallback for local use
 def transcribe_audio(voice_path):
-    """
-    Converts an audio file to text using Google Cloud Speech-to-Text.
-    Falls back to Whisper if Google is not configured or fails.
-    """
     try:
-        # 🔹 Try Google Cloud Speech first
         if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
             from google.cloud import speech
             client = speech.SpeechClient()
-
             with open(voice_path, "rb") as audio_file:
                 content = audio_file.read()
-
             audio = speech.RecognitionAudio(content=content)
             config = speech.RecognitionConfig(
                 encoding=speech.RecognitionConfig.AudioEncoding.WEBM_OPUS,
                 sample_rate_hertz=48000,
                 language_code="en-US",
             )
-
             response = client.recognize(config=config, audio=audio)
             if response.results:
                 return response.results[0].alternatives[0].transcript
 
-        # 🔹 Fallback to Whisper (offline)
         import whisper
         model = whisper.load_model("base")
         result = model.transcribe(voice_path)
@@ -40,23 +32,33 @@ def transcribe_audio(voice_path):
         return None
 
 
-def generate_marketing_post(user_text=None, image_path=None, voice_path=None):
+def generate_social_post(user_text=None, image_path=None, voice_path=None,
+                         post_type="marketing", generate_image=False):
     """
-    Generates an AI-powered social media marketing post using Gemini.
-    Supports text, image, and voice input.
+    Generates an AI-powered social media post (marketing or personal brand) using Gemini for text
+    and OpenAI v1 Images API for optional image generation.
     """
     try:
-        # ✅ Step 1: Combine user text
-        combined_text = user_text.strip() if user_text else ""
-        if not combined_text and not image_path:
+        if not user_text and not image_path and not voice_path:
             raise ValueError("Please provide text, image, or voice input.")
 
-        # ✅ Step 2: Create Gemini model
+        # Combine text
+        combined_text = user_text.strip() if user_text else ""
+        if voice_path:
+            voice_text = transcribe_audio(voice_path)
+            combined_text += " " + (voice_text or "")
+
+        # Gemini model (text generation)
         model = genai.GenerativeModel(model_name="gemini-2.0-flash")
 
-        # ✅ Step 3: Dynamic prompt
+        post_type_prompt = (
+            "You are a professional personal brand strategist."
+            if post_type == "personal_brand"
+            else "You are a professional social media marketer."
+        )
+
         prompt = f"""
-        You are a professional social media marketer.
+        {post_type_prompt}
         Create one single highly engaging post based on this input:
 
         "{combined_text or 'Use the attached image or voice as context to inspire the post.'}"
@@ -68,36 +70,49 @@ def generate_marketing_post(user_text=None, image_path=None, voice_path=None):
         - Use persuasive and concise wording
         - Make it ready to post on Instagram, Twitter, Facebook, Threads
         - Do not give multiple options, only the best single post
-        - The post should grab attention and encourage interaction
+        - Encourage engagement and interaction
         """
 
         contents = [prompt]
 
-        # ✅ Attach image bytes if provided
+        # Attach image/voice if provided
         if image_path and os.path.exists(image_path):
             with open(image_path, "rb") as f:
                 contents.append({"mime_type": "image/jpeg", "data": f.read()})
-
-        # ✅ Attach voice bytes if provided
         if voice_path and os.path.exists(voice_path):
             with open(voice_path, "rb") as f:
                 contents.append({"mime_type": "audio/webm", "data": f.read()})
 
-        # ✅ Step 4: Generate post
         response = model.generate_content(contents)
-
         post_text = getattr(response, "text", "").strip()
         if not post_text and hasattr(response, "candidates"):
             post_text = response.candidates[0].content.parts[0].text.strip()
-
         if not post_text:
             raise ValueError("No text returned from Gemini API")
 
-        # ✅ Add emoji flair if missing
+        # Remove unwanted asterisks
+        post_text = post_text.replace("*", "")
+
+        # Add emojis if missing
         if not any(char in post_text for char in "😀😃😄😁😆🔥✨🎉💥"):
             post_text = "🔥 " + post_text + " ✨"
 
-        return {"post": post_text}
+        result = {"post": post_text}
+
+        # ✅ Optional: generate image via new OpenAI Images API
+        if generate_image:
+            openai.api_key = os.getenv("OPENAI_API_KEY")
+            image_resp = openai.images.generate(
+                model="gpt-image-1",
+                prompt=post_text,
+                size="1024x1024",
+                n=1
+            )
+            if image_resp and "data" in image_resp:
+                img_bytes = base64.b64decode(image_resp["data"][0]["b64_json"])
+                result["image_bytes"] = img_bytes
+
+        return result
 
     except Exception as e:
         print("❌ Gemini generation error:", e)

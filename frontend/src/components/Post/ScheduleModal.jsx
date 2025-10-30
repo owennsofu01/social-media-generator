@@ -11,15 +11,20 @@ const ScheduleModal = ({
   submitSchedule,
 }) => {
   const [loading, setLoading] = useState(false);
+  // Added state for non-alert validation feedback
+  const [validationMessage, setValidationMessage] = useState(""); 
 
   const handleSubmit = async () => {
+    // Replaced alert() with local validation message
     if (!scheduledTime || selectedPlatforms.length === 0) {
-      alert("Please select date/time and at least one platform");
+      setValidationMessage("⚠️ Please select date/time and at least one platform.");
       return;
     }
+    setValidationMessage(""); // Clear validation message
 
     setLoading(true);
     try {
+      // submitSchedule is expected to handle the API call and any success/error feedback
       await submitSchedule();
     } finally {
       setLoading(false);
@@ -29,76 +34,111 @@ const ScheduleModal = ({
   if (!modalOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-      <div className="bg-white p-6 rounded-xl max-w-md w-full shadow-lg flex flex-col gap-4">
-        <h3 className="text-lg font-semibold text-center md:text-left">Schedule Post</h3>
-        <p className="text-gray-600 break-words">Post: {modalText}</p>
+    // Backdrop with slight blur
+    <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 p-4 backdrop-blur-sm">
+      <div className="bg-white p-6 rounded-2xl max-w-lg w-full shadow-2xl flex flex-col gap-5 border border-gray-100">
+        
+        {/* Modal Header */}
+        <h3 className="text-xl font-extrabold text-gray-800 border-b pb-3 mb-1">
+          📅 Schedule Your Post
+        </h3>
 
-        <input
-          type="datetime-local"
-          value={scheduledTime}
-          onChange={(e) => setScheduledTime(e.target.value)}
-          className="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#AD974F] w-full"
-        />
-
-        <div className="flex flex-wrap gap-2">
-          {["x", "linkedin", "facebook", "instagram", "threads"].map((platform) => (
-            <label
-              key={platform}
-              className={`px-4 py-2 border rounded-xl cursor-pointer select-none transition-colors duration-200 flex-1 text-center ${
-                selectedPlatforms.includes(platform)
-                  ? "bg-[#AD974F] text-white border-[#AD974F]"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-[#EAEAEA]"
-              }`}
-            >
-              <input
-                type="checkbox"
-                className="hidden"
-                checked={selectedPlatforms.includes(platform)}
-                onChange={() => togglePlatform(platform)}
-              />
-              {platform === "x" ? "X / Twitter" : platform.charAt(0).toUpperCase() + platform.slice(1)}
-            </label>
-          ))}
+        {/* Post Preview */}
+        <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm max-h-40 overflow-y-auto">
+            <strong className="text-gray-700">Content:</strong>
+            <p className="mt-1 text-gray-600 italic line-clamp-3">{modalText}</p>
         </div>
 
-        <div className="flex flex-col md:flex-row justify-end gap-2 mt-2">
-          <button
-            onClick={() => setModalOpen(false)}
-            className="px-4 py-2 bg-gray-300 rounded-xl hover:bg-gray-400 w-full md:w-auto"
-            disabled={loading}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="px-4 py-2 bg-[#AD974F] text-white rounded-xl hover:bg-[#8E793E] w-full md:w-auto flex items-center justify-center gap-2"
-            disabled={loading}
-          >
-            {loading && (
-              <svg
-                className="animate-spin h-5 w-5 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                ></path>
-              </svg>
-            )}
-            {loading ? "Scheduling..." : "Schedule"}
-          </button>
+        {/* Date/Time Input */}
+        <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Scheduled Time</label>
+            <input
+                type="datetime-local"
+                value={scheduledTime}
+                onChange={(e) => {
+                    setScheduledTime(e.target.value);
+                    setValidationMessage(""); // Clear message when user types
+                }}
+                className="border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full transition duration-150 text-gray-700"
+            />
+        </div>
+
+        {/* Platform Selection */}
+        <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Select Platforms</label>
+            <div className="flex flex-wrap gap-2">
+                {["x", "linkedin", "facebook", "instagram", "threads"].map((platform) => (
+                    <label
+                        key={platform}
+                        // Refined button styles using the blue theme
+                        className={`px-3 py-1.5 border rounded-full cursor-pointer select-none text-xs font-semibold transition-all duration-200 
+                            ${
+                                selectedPlatforms.includes(platform)
+                                    ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                                    : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:border-blue-300"
+                            }`}
+                    >
+                        <input
+                            type="checkbox"
+                            className="hidden"
+                            checked={selectedPlatforms.includes(platform)}
+                            onChange={() => {
+                                togglePlatform(platform);
+                                setValidationMessage(""); // Clear message when user interacts
+                            }}
+                        />
+                        {platform === "x" ? "X / Twitter" : platform.charAt(0).toUpperCase() + platform.slice(1)}
+                    </label>
+                ))}
+            </div>
+        </div>
+
+        {/* Validation Feedback Display */}
+        {validationMessage && (
+            <p className="text-red-500 text-sm font-medium p-2 bg-red-50 border border-red-200 rounded-lg">
+                {validationMessage}
+            </p>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row justify-end gap-3 pt-3 border-t border-gray-100">
+            <button
+                onClick={() => setModalOpen(false)}
+                className="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition w-full sm:w-auto font-medium"
+                disabled={loading}
+            >
+                Cancel
+            </button>
+            <button
+                onClick={handleSubmit}
+                // Updated primary button color to blue-600
+                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition w-full sm:w-auto font-medium flex items-center justify-center gap-2 shadow-md disabled:bg-blue-400"
+                disabled={loading}
+            >
+                {loading && (
+                    <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                        ></circle>
+                        <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8H4z"
+                        ></path>
+                    </svg>
+                )}
+                {loading ? "Scheduling..." : "Schedule Post"}
+            </button>
         </div>
       </div>
     </div>
