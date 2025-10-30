@@ -1,5 +1,5 @@
 import React from "react";
-
+import { motion } from "framer-motion";
 
 // Define animation variants for the grid container
 const containerVariants = {
