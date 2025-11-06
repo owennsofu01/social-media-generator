@@ -27,7 +27,8 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": [
     "https://hilarious-palmier-3f3412.netlify.app", 
     "http://localhost:5173",   # ✅ Corrected for Vite
-    "http://localhost:3000"    # (Optional: keep if you ever use CRA)
+    "http://localhost:3000",
+    "https://postgenza.com"  # (Optional: keep if you ever use CRA)
 ]}})
 
 
