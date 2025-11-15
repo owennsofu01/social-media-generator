@@ -44,10 +44,12 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 from auth.routes import auth_bp
 from posts.routes import posts_bp
 from posts.scheduled_routes import scheduled_bp
+from payment.routes import payment_bp  # ✅ NEW
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(posts_bp)
 app.register_blueprint(scheduled_bp)
+app.register_blueprint(payment_bp)  # ✅ NE
 
 # --------------------------
 # Start Scheduler (background jobs)

@@ -36,11 +36,11 @@ def transcribe_audio(voice_path):
 
 def generate_social_post(user_text=None, image_path=None, voice_path=None,
                          post_type="marketing", generate_image=False,
-                         tone="default", platform="general"):
+                         tone="default", platform="general", word_count=None):
     """
     Generates an AI-powered social media post using Gemini for text
     and OpenAI Images API for optional image generation.
-    Supports tone & platform-specific formatting.
+    Supports tone, platform-specific formatting, and optional word count.
     """
     try:
         if not user_text and not image_path and not voice_path:
@@ -52,7 +52,7 @@ def generate_social_post(user_text=None, image_path=None, voice_path=None,
             voice_text = transcribe_audio(voice_path)
             combined_text += " " + (voice_text or "")
 
-        # Define tone styles
+        # Tone styles
         tone_descriptions = {
             "professional": "Use a confident, expert tone that builds trust.",
             "funny": "Use humor, puns, or relatable jokes to engage the reader.",
@@ -62,7 +62,7 @@ def generate_social_post(user_text=None, image_path=None, voice_path=None,
             "default": ""
         }
 
-        # Define platform styles
+        # Platform styles
         platform_styles = {
             "instagram": "Use emojis, short lines, and relevant hashtags. Make it visually appealing and conversational.",
             "linkedin": "Use a professional, insightful tone with structured paragraphs. Avoid excessive emojis.",
@@ -82,6 +82,11 @@ def generate_social_post(user_text=None, image_path=None, voice_path=None,
             else "You are a marketing strategist creating viral brand content."
         )
 
+        # 🆕 Include word count constraint if provided
+        word_limit_instruction = ""
+        if word_count:
+            word_limit_instruction = f"Ensure the post is approximately {word_count} words long."
+
         # Combine prompt
         prompt = f"""
         {post_type_prompt}
@@ -98,6 +103,7 @@ def generate_social_post(user_text=None, image_path=None, voice_path=None,
         - Keep the tone consistent and engaging
         - Make it ready to post directly
         - Do not give multiple options, only the best single post
+        {word_limit_instruction}
         """
 
         # Send prompt to Gemini

@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-// Assuming the environment provides global access to routing or that this component is used within a Router context.
-// In a standard React setup, you would use actual imports for routing hooks.
-// Since the environment is limited, we'll assume a global navigation/location substitute for these hooks if they don't resolve.
-// For this example, we will define mock hooks for full component compilation.
-const useNavigate = () => (path) => console.log(`Navigating to: ${path}`);
-const useLocation = () => ({ pathname: typeof window !== 'undefined' ? window.location.pathname : '/' });
-
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   FaHome,
   FaUser,
@@ -15,19 +9,16 @@ import {
   FaCalendarAlt,
   FaBars,
   FaTimes,
-  FaColumns, // Icon for collapse/expand toggle
+  FaColumns,
 } from "react-icons/fa";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // State for mobile menu open/closed
   const [isOpen, setIsOpen] = useState(false);
-  // State for desktop sidebar collapsed/expanded
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Completed menu items with icons
   const menuItems = [
     { icon: <FaHome size={20} />, label: "Home", path: "/" },
     { icon: <FaPaperPlane size={20} />, label: "Post Generator", path: "/post-generator" },
@@ -38,16 +29,13 @@ const Sidebar = () => {
   ];
 
   const handleNavigation = (path) => {
-    // Mocking localStorage for logout
-    if (path === "/login" && typeof localStorage !== 'undefined') {
+    if (path === "/login" && typeof localStorage !== "undefined") {
       localStorage.removeItem("user_id");
     }
     navigate(path);
-    setIsOpen(false); // Close mobile menu after navigation
+    setIsOpen(false);
   };
 
-  // NavLink component is updated to correctly handle the collapsed state,
-  // making the label conditionally visible for a cleaner look when collapsed.
   const NavLink = ({ item }) => {
     const isActive = location.pathname === item.path;
     const baseClass =
@@ -58,15 +46,11 @@ const Sidebar = () => {
     return (
       <button
         onClick={() => handleNavigation(item.path)}
-        className={`${baseClass} ${isActive ? activeClass : inactiveClass} relative group`}
-        role="button"
-        tabIndex={0}
         onKeyPress={(e) => e.key === "Enter" && handleNavigation(item.path)}
         aria-current={isActive ? "page" : undefined}
+        className={`${baseClass} ${isActive ? activeClass : inactiveClass} relative group`}
       >
         {item.icon}
-        {/* Only show label if sidebar is NOT collapsed. 
-            The `ml-3` ensures spacing when open. `whitespace-nowrap` prevents wrapping. */}
         <span
           className={`transition-opacity duration-300 ease-in-out ${
             isCollapsed ? "opacity-0 w-0 h-0 hidden" : "opacity-100 w-auto ml-3"
@@ -74,12 +58,11 @@ const Sidebar = () => {
         >
           {item.label}
         </span>
-        
-        {/* Tooltip for collapsed state for accessibility and usability */}
+
         {isCollapsed && (
-            <span className="absolute z-50 left-full ml-4 px-3 py-1 bg-gray-700 text-white text-sm rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                {item.label}
-            </span>
+          <span className="absolute z-50 left-full ml-4 px-3 py-1 bg-gray-700 text-white text-sm rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+            {item.label}
+          </span>
         )}
       </button>
     );
@@ -87,7 +70,7 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* ===== 1. Mobile Header (Fixed and Improved) ===== */}
+      {/* ================= MOBILE HEADER ================= */}
       <header className="md:hidden fixed top-0 left-0 w-full bg-gray-900 text-white flex justify-between items-center p-4 z-40 shadow-2xl">
         <h1 className="text-2xl font-extrabold text-blue-400">Owenito AI</h1>
         <button
@@ -99,14 +82,14 @@ const Sidebar = () => {
         </button>
       </header>
 
-      {/* ===== 2. Desktop Sidebar ===== */}
+      {/* ================= DESKTOP SIDEBAR ================= */}
       <aside
-        className={`hidden md:flex fixed top-0 left-0 h-full bg-gray-800 text-white shadow-xl flex-col p-5 z-40 transition-all duration-300 ${
+        className={`hidden md:flex h-screen bg-gray-800 text-white shadow-xl flex-col p-5 z-40 transition-all duration-300 ${
           isCollapsed ? "w-20" : "w-64"
-        } overflow-y-auto`}
+        } overflow-y-auto flex-shrink-0`}
       >
+        {/* Logo + Collapse Button */}
         <div className="flex justify-between items-center mb-8 border-b border-gray-700 pb-3">
-          {/* Title is conditionally shown/hidden smoothly */}
           <h2
             className={`text-3xl font-extrabold text-blue-400 transition-opacity duration-300 overflow-hidden ${
               isCollapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
@@ -123,6 +106,7 @@ const Sidebar = () => {
           </button>
         </div>
 
+        {/* Navigation Links */}
         <nav className="flex flex-col gap-2">
           {menuItems.map((item, idx) => (
             <NavLink key={idx} item={item} />
@@ -130,7 +114,7 @@ const Sidebar = () => {
         </nav>
       </aside>
 
-      {/* ===== 3. Mobile Sidebar (Drawer) ===== */}
+      {/* ================= MOBILE SIDEBAR ================= */}
       <div
         className={`fixed top-0 left-0 h-full bg-gray-900 text-white shadow-2xl z-50 w-64 transform transition-transform duration-300 md:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
@@ -148,14 +132,13 @@ const Sidebar = () => {
         </div>
 
         <nav className="flex flex-col gap-2 px-4 mt-4">
-          {/* NavLink component will automatically behave as non-collapsed in the mobile view */}
           {menuItems.map((item, idx) => (
             <NavLink key={idx} item={item} />
           ))}
         </nav>
       </div>
 
-      {/* ===== 4. Mobile Overlay ===== */}
+      {/* ================= BACKDROP ================= */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden"
@@ -164,7 +147,7 @@ const Sidebar = () => {
         ></div>
       )}
 
-      {/* ===== 5. Spacer for Mobile Header (Ensures content starts below the fixed header) ===== */}
+      {/* Mobile Spacer (prevent overlap with header) */}
       <div className="md:hidden h-20"></div>
     </>
   );

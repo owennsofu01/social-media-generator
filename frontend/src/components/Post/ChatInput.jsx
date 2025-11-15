@@ -10,11 +10,16 @@ const ChatInput = ({
   imageFile,
   setImageFile,
   audioBlob,
+  audioUrl, // new prop
+  setAudioUrl, // new prop
 }) => {
-  // Activate send button if any content exists: text, image, or voice
   const isSendActive = inputText.trim() !== "" || audioBlob || Boolean(imageFile);
 
   const handleImageRemove = () => setImageFile(null);
+  const handleAudioRemove = () => {
+    setAudioBlob(null);
+    setAudioUrl(null);
+  };
 
   return (
     <div className="flex flex-col gap-2 p-3 bg-white border-t border-gray-200 shadow-lg">
@@ -31,6 +36,20 @@ const ChatInput = ({
             onClick={handleImageRemove}
             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
             aria-label="Remove image"
+          >
+            <FaTimes size={12} />
+          </button>
+        </div>
+      )}
+
+      {/* Audio Preview */}
+      {audioBlob && audioUrl && (
+        <div className="flex items-center gap-2 mb-2 p-2 bg-gray-100 rounded-lg border border-gray-300">
+          <audio controls src={audioUrl} className="flex-1" />
+          <button
+            onClick={handleAudioRemove}
+            className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition"
+            aria-label="Remove audio"
           >
             <FaTimes size={12} />
           </button>

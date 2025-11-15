@@ -1,138 +1,209 @@
-import React from "react";
-import { motion } from "framer-motion";
-
-// Define animation variants for the grid container
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15, // Delay between each card's animation start
-    },
-  },
-};
-
-// Define animation variants for each individual plan card
-const itemVariants = {
-  hidden: { y: 50, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.6,
-      ease: "easeOut",
-    },
-  },
-};
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
+import CardPaymentForm from "./CardPaymentForm";
+import axios from "axios";
 
 const plans = [
   {
     title: "Basic",
     price: "$4.99/month",
+    amount: "5",
     features: [
-      "Generate up to 5 text posts/day",
-      "Basic post scheduling",
-      "Share to 1 platform",
-      "No image upload",
-      "No voice recording",
+      { name: "Generate 2 posts per day", available: true },
+      { name: "Schedule on 1 social media platform", available: true },
+      { name: "Can copy posts", available: true },
+      { name: "Schedule on 3 social media platforms", available: false },
+      { name: "Image generation", available: false },
+      { name: "Word count feature", available: false },
+      { name: "Unlimited post generation", available: false },
+      { name: "Full access to all features", available: false },
+      { name: "Copy & share posts", available: false },
     ],
   },
   {
     title: "Pro",
     price: "$9.99/month",
+    amount: "10",
     features: [
-      "Unlimited text posts",
-      "Upload images",
-      "Record voice for posts",
-      "Advanced post scheduling",
-      "Share to multiple platforms (X, LinkedIn, Facebook)",
-      "Email support",
+      { name: "Generate 4 posts per day", available: true },
+      { name: "Schedule on 3 social media platforms", available: true },
+      { name: "Image generation", available: true },
+      { name: "Word count feature", available: true },
+      { name: "Can copy posts", available: true },
+      { name: "Unlimited post generation", available: false },
+      { name: "Full access to all features", available: false },
+      { name: "Copy & share posts", available: false },
     ],
   },
   {
     title: "Premium",
     price: "$19.99/month",
+    amount: "20",
     features: [
-      "All Pro features",
-      "Priority AI generation",
-      "Full social media automation",
-      "Share to all supported platforms (including Instagram & Threads)",
-      "Dedicated support",
+      { name: "Unlimited post generation", available: true },
+      { name: "Full scheduling on all platforms", available: true },
+      { name: "Copy & share posts", available: true },
+      { name: "Image generation", available: true },
+      { name: "Word count feature", available: true },
+      { name: "All features unlocked", available: true },
     ],
   },
 ];
 
 const Pricing = () => {
+  const navigate = useNavigate();
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState("mobile_money");
+
+  const handleChoosePlan = (plan) => {
+    setSelectedPlan(plan);
+    setShowPaymentModal(true);
+  };
+
+  const handleMobilePayment = async () => {
+    if (!mobileNumber) {
+      toast.error("Please enter your mobile number for Mobile Money payment.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/api/payments/pay-to-ewallet",
+        {
+          receiver_id: mobileNumber,
+          reference_no: `INV-${Date.now()}`,
+          amount: selectedPlan.amount,
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      toast.success(
+        `Payment successful! Transaction ID: ${response.data.zynle_response.transaction_id || "N/A"}`
+      );
+      setShowPaymentModal(false);
+      navigate("/success");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.error || "Payment failed.");
+      navigate("/cancel");
+    }
+  };
+
   return (
-    <section className="bg-gray-50 min-h-screen py-20 px-6 md:px-10">
-      <motion.div
-        className="max-w-6xl mx-auto text-center"
-        initial={{ opacity: 0, y: 20 }} // Update the main header block to animate slightly
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <h2 className="text-4xl font-extrabold text-gray-900 mb-4">
-          Simple, Transparent <span className="text-blue-600">Pricing Plans</span>
-        </h2>
-        <p className="text-gray-600 mb-12 max-w-2xl mx-auto text-lg">
-          Choose a plan that fits your social media needs. Upgrade anytime to unlock more features.
-        </p>
+    <div className="max-w-6xl mx-auto py-12 px-4">
+      <h2 className="text-4xl font-bold text-center mb-8">Pricing Plans</h2>
 
-        {/* This motion.div now controls the staggered scroll-in animation */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-8"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          {plans.map((plan, idx) => (
-            <motion.div
-              key={idx}
-              className={`rounded-3xl shadow-xl p-8 transition-all duration-500 flex flex-col ${
-                idx === 1
-                  ? "bg-blue-600 text-white transform scale-[1.02]" // Highlighted Pro plan
-                  : "bg-white hover:shadow-2xl"
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {plans.map((plan, idx) => (
+          <div
+            key={idx}
+            className={`p-8 rounded-2xl shadow-lg flex flex-col border transition-transform hover:scale-105 ${
+              plan.title === "Premium" ? "border-blue-500 shadow-2xl" : "border-gray-200"
+            }`}
+          >
+            {plan.title === "Premium" && (
+              <div className="bg-blue-500 text-white text-sm font-bold px-3 py-1 rounded-full w-max mb-3">
+                Featured
+              </div>
+            )}
+            <h3 className="text-2xl font-bold mb-2">{plan.title}</h3>
+            <p className="text-3xl font-extrabold mb-6">{plan.price}</p>
+
+            <ul className="mb-6 space-y-2">
+              {plan.features.map((feature, fIdx) => (
+                <li
+                  key={fIdx}
+                  className={`flex items-center gap-2 ${
+                    feature.available
+                      ? plan.title === "Premium"
+                        ? "text-green-600 font-semibold"
+                        : "text-gray-800"
+                      : "text-gray-400 line-through"
+                  }`}
+                >
+                  {feature.available ? <FaCheckCircle /> : <FaTimesCircle />}
+                  {feature.name}
+                </li>
+              ))}
+            </ul>
+
+            <button
+              onClick={() => handleChoosePlan(plan)}
+              className={`mt-auto py-3 rounded-lg text-white font-semibold transition-colors flex justify-center items-center gap-2 ${
+                plan.title === "Premium"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-blue-600 hover:bg-blue-700"
               }`}
-              whileHover={{ scale: idx === 1 ? 1.05 : 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              variants={itemVariants} // Apply the item animation for stagger effect
             >
-              <h3 className={`text-3xl font-bold mb-2 ${idx !== 1 ? "text-gray-900" : "text-white"}`}>
-                {plan.title}
-              </h3>
-              <p className={`text-4xl font-extrabold mb-6 ${idx !== 1 ? "text-blue-600" : "text-white"}`}>
-                {plan.price}
-              </p>
+              Choose Plan
+            </button>
+          </div>
+        ))}
+      </div>
 
-              <ul className="mb-8 space-y-3 text-left flex-grow">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className={`flex items-start gap-3 ${idx !== 1 ? "text-gray-700" : "text-blue-100"}`}>
-                    <span className={`flex-shrink-0 text-xl ${idx !== 1 ? "text-blue-500" : "text-blue-100"}`}>
-                      {/* Using Lucide React icons with a small fallback SVG if not available */}
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check-circle-2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
-                    </span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
+      {/* Payment Modal */}
+      <AnimatePresence>
+        {showPaymentModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          >
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="bg-white rounded-xl p-8 m-10 w-200 relative shadow-2xl"
+            >
+              <h3 className="text-xl font-bold mb-4">Select Payment Method</h3>
 
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`font-semibold px-8 py-3 rounded-xl w-full text-lg transition-all duration-300 shadow-md ${
-                  idx === 1
-                    ? "bg-white text-blue-600 hover:bg-blue-50/90" // Highlighted button
-                    : "bg-blue-600 text-white hover:bg-blue-700"
-                }`}
+              <select
+                value={selectedMethod}
+                onChange={(e) => setSelectedMethod(e.target.value)}
+                className="w-full border px-3 py-2 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500"
               >
-                Choose Plan
-              </motion.button>
+                <option value="mobile_money">Mobile Money</option>
+                <option value="card">Card</option>
+              </select>
+
+              {selectedMethod === "mobile_money" ? (
+                <>
+                  <input
+                    type="text"
+                    placeholder="Enter your mobile number"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    className="w-full border px-3 py-2 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={handleMobilePayment}
+                    className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                  >
+                    Pay {selectedPlan?.price}
+                  </button>
+                </>
+              ) : (
+                <CardPaymentForm plan={selectedPlan} />
+              )}
+
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                className="absolute top-3 right-3 text-gray-600 hover:text-gray-900 font-bold"
+              >
+                ×
+              </button>
             </motion.div>
-          ))}
-        </motion.div>
-      </motion.div>
-    </section>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

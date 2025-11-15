@@ -7,10 +7,9 @@ const Footer = () => {
   // Define social links (use '#' as a temporary placeholder)
   const socialLinks = [
     { icon: FaFacebook, href: "#", label: "Facebook" },
-    { icon: FaTwitter, href: "#", label: "Twitter" },
+  
     { icon: FaLinkedin, href: "#", label: "LinkedIn" },
-    { icon: FaInstagram, href: "#", label: "Instagram" },
-    { icon: SiThreads, href: "#", label: "Threads" },
+ 
   ];
 
   return (
