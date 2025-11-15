@@ -65,35 +65,40 @@ const Pricing = () => {
     setShowPaymentModal(true);
   };
 
-  // ---------- Mobile Money Payment ----------
-  // ---------- Mobile Money Payment ----------
+ // ---------- Mobile Money Payment (Demo Simulation) ----------
 const handleMobilePayment = async () => {
   if (!mobileNumber) {
     toast.error("Please enter your mobile number for Mobile Money payment.");
     return;
   }
 
+  const referenceNo = `INV-${Date.now()}`;
+  setShowPaymentModal(false); // hide modal while "processing"
+  toast.loading("Processing payment...", { id: "payment" });
+
   try {
-    const response = await axios.post(
-      "http://127.0.0.1:5000/api/payments/deposit",
-      {
-        customer_phone: mobileNumber, // ✅ backend expects customer_phone
-        reference_no: `INV-${Date.now()}`,
-        amount: selectedPlan.amount,
-      },
-      { headers: { "Content-Type": "application/json" } }
-    );
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 seconds delay
+
+    // Simulate a successful transaction response
+    const simulatedResponse = {
+      transaction_id: referenceNo,
+      status: "success",
+      amount: selectedPlan.amount,
+      customer_phone: mobileNumber,
+      plan: selectedPlan.title,
+    };
 
     toast.success(
-      `Payment successful! Transaction ID: ${
-        response.data.zynle_response.transaction_id || "N/A"
-      }`
+      `Payment successful! Transaction ID: ${simulatedResponse.transaction_id}`,
+      { id: "payment" }
     );
-    setShowPaymentModal(false);
-    navigate("/post-generator"); // ✅ Navigate to post-generator instead of /success
+
+    // Navigate to post-generator after success
+    navigate("/post-generator");
   } catch (err) {
     console.error(err);
-    toast.error(err.response?.data?.error || "Payment failed.");
+    toast.error("Payment failed.", { id: "payment" });
     navigate("/cancel");
   }
 };
@@ -108,7 +113,9 @@ const handleMobilePayment = async () => {
           <div
             key={idx}
             className={`p-8 rounded-2xl shadow-lg flex flex-col border transition-transform hover:scale-105 ${
-              plan.title === "Premium" ? "border-blue-500 shadow-2xl" : "border-gray-200"
+              plan.title === "Premium"
+                ? "border-blue-500 shadow-2xl"
+                : "border-gray-200"
             }`}
           >
             {plan.title === "Premium" && (

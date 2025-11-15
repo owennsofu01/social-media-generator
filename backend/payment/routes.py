@@ -15,11 +15,8 @@ MERCHANT_ID = os.getenv("ZYNLE_MERCHANT_ID")
 API_KEY = os.getenv("ZYNLE_API_KEY")
 
 
-# ============================================================
-# MOBILE MONEY DEPOSIT (customer → merchant)
-# ============================================================
 @payment_bp.route("/deposit", methods=["POST", "OPTIONS"])
-@cross_origin()  # Handles CORS preflight automatically
+@cross_origin()  # handles CORS preflight
 def deposit():
     if request.method == "OPTIONS":
         return '', 200
@@ -32,7 +29,7 @@ def deposit():
 
         if not customer_phone or not reference_no or not amount:
             return jsonify({
-                "error": "customer_phone, reference_no, amount are required"
+                "error": "customer_phone, reference_no, and amount are required"
             }), 400
 
         payload = {
@@ -40,10 +37,10 @@ def deposit():
                 "api_id": API_ID,
                 "merchant_id": MERCHANT_ID,
                 "api_key": API_KEY,
-                "channel": "mobile_money"
+                "channel": "mobile_money"  # deposit via mobile money
             },
             "data": {
-                "method": "runCollectPayment",   # ✅ Deposit method
+                "method": "runCollectPayment",  # ✅ deposit method
                 "customer_phone": customer_phone,
                 "reference_no": reference_no,
                 "amount": amount,
@@ -52,15 +49,15 @@ def deposit():
         }
 
         response = requests.post(ZYNLE_URL, json=payload)
+        result = response.json()
+
         return jsonify({
             "status": "success",
-            "zynle_response": response.json()
+            "zynle_response": result
         }), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
 # ============================================================
 # MOBILE MONEY WITHDRAWAL (merchant → customer)
 # ============================================================
