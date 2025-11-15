@@ -65,34 +65,39 @@ const Pricing = () => {
     setShowPaymentModal(true);
   };
 
-  const handleMobilePayment = async () => {
-    if (!mobileNumber) {
-      toast.error("Please enter your mobile number for Mobile Money payment.");
-      return;
-    }
+  // ---------- Mobile Money Payment ----------
+  // ---------- Mobile Money Payment ----------
+const handleMobilePayment = async () => {
+  if (!mobileNumber) {
+    toast.error("Please enter your mobile number for Mobile Money payment.");
+    return;
+  }
 
-    try {
-      const response = await axios.post(
-        "http://127.0.0.1:5000/api/payments/pay-to-ewallet",
-        {
-          receiver_id: mobileNumber,
-          reference_no: `INV-${Date.now()}`,
-          amount: selectedPlan.amount,
-        },
-        { headers: { "Content-Type": "application/json" } }
-      );
+  try {
+    const response = await axios.post(
+      "http://127.0.0.1:5000/api/payments/deposit",
+      {
+        customer_phone: mobileNumber, // ✅ backend expects customer_phone
+        reference_no: `INV-${Date.now()}`,
+        amount: selectedPlan.amount,
+      },
+      { headers: { "Content-Type": "application/json" } }
+    );
 
-      toast.success(
-        `Payment successful! Transaction ID: ${response.data.zynle_response.transaction_id || "N/A"}`
-      );
-      setShowPaymentModal(false);
-      navigate("/success");
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.error || "Payment failed.");
-      navigate("/cancel");
-    }
-  };
+    toast.success(
+      `Payment successful! Transaction ID: ${
+        response.data.zynle_response.transaction_id || "N/A"
+      }`
+    );
+    setShowPaymentModal(false);
+    navigate("/post-generator"); // ✅ Navigate to post-generator instead of /success
+  } catch (err) {
+    console.error(err);
+    toast.error(err.response?.data?.error || "Payment failed.");
+    navigate("/cancel");
+  }
+};
+
 
   return (
     <div className="max-w-6xl mx-auto py-12 px-4">
