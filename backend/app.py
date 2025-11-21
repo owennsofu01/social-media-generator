@@ -26,6 +26,7 @@ app = Flask(__name__)
 # --- CORS FIX: Explicitly specify the front-end origin ---
 CORS(app, resources={r"/*": {"origins": [
     "https://owennsofu.com", 
+    "https://www.owennsofu.com",
     "http://localhost:5173",   # ✅ Corrected for Vite
     "http://localhost:3000",
     "https://postgenza.com"  # (Optional: keep if you ever use CRA)

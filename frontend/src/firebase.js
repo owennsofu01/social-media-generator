@@ -4,7 +4,7 @@ import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCNJ-lhjdD2yIiNcTxXdn8PWF8cwoPQrB8",
-  authDomain: "socialai-69b8f.firebaseapp.com",
+  authDomain: "owennsofu.com",
   databaseURL: "https://socialai-69b8f-default-rtdb.firebaseio.com",
   projectId: "socialai-69b8f",
   storageBucket: "socialai-69b8f.firebasestorage.app",
