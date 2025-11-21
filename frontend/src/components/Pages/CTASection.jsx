@@ -56,7 +56,7 @@ const CTASection = () => (
         {/* Secondary Button: Outlined white border */}
         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
           <Link 
-            to="/pricing" 
+            to="/404" 
             className="border-2 border-white hover:bg-white hover:text-blue-700 text-white 
                        font-semibold px-8 py-3.5 rounded-full transition-all duration-200 
                        text-lg inline-block"

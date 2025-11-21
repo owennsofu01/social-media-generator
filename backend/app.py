@@ -25,7 +25,7 @@ app = Flask(__name__)
 # render.com backend.
 # --- CORS FIX: Explicitly specify the front-end origin ---
 CORS(app, resources={r"/*": {"origins": [
-    "https://hilarious-palmier-3f3412.netlify.app", 
+    "https://owennsofu.com", 
     "http://localhost:5173",   # ✅ Corrected for Vite
     "http://localhost:3000",
     "https://postgenza.com"  # (Optional: keep if you ever use CRA)

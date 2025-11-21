@@ -14,16 +14,17 @@ import Pricing from "./components/Pages/Pricing";
 import Success from "./components/Subscribe/Success";
 import Cancel from "./components/Subscribe/Cancel";
 import ScheduledPostsList from "./components/Post/ScheduledPostsList";
-import Profile from "./components/User/ProfilePage";
+
 import ProfilePage from "./components/User/ProfilePage";
 import { Toaster } from "react-hot-toast";
 import CardPaymentForm from "./components/Pages/CardPaymentForm";
+import NotFoundPage from "./NotFoundPage";
 
 const AppLayout = ({ children }) => {
   const location = useLocation();
 
   // Sidebar visibility
-  const hideSidebarOn = ["/", "/pricing", "/contact"];
+  const hideSidebarOn = ["/", "/pricing", "/contact","*"];
   const showSidebar = !hideSidebarOn.includes(location.pathname);
 
   // Header/Footer visibility
@@ -35,6 +36,7 @@ const AppLayout = ({ children }) => {
     "/scheduled-posts",
     "/sidebar",
     "/profile" ,
+    "*"
    // <-- use leading slash
   ];
   const shouldHide = hideLayoutOn.includes(location.pathname);
@@ -74,17 +76,18 @@ const App = () => {
                 <Route path="/success" element={<Success />} />
                 <Route path="/cancel" element={<Cancel />} />
                 <Route path="/profile" element={<ProfilePage />} />
-import CardPaymentForm from "./components/Payments/CardPaymentForm";
 
-// Inside your Routes nested under AppLayout
+
+
 <Route path="/card-payment" element={<CardPaymentForm />} />
 
 
-                <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+                
               </Routes>
             </AppLayout>
           }
         />
+        <Route path="/404" element={<NotFoundPage/>} />
       </Routes>
     </Router>
   );

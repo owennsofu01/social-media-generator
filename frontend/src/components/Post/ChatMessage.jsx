@@ -19,66 +19,73 @@ const ChatMessage = ({ sender, text, imageUrl, audioUrl, onCopy, onSchedule }) =
     if (onCopy) {
       onCopy(text);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000); // reset after 2s
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
   return (
     <div className={`w-full max-w-lg p-4 rounded-xl shadow-md break-words ${bgClass}`}>
+      
       {/* Message Text */}
       <div className="text-sm leading-relaxed whitespace-pre-wrap">{text}</div>
 
-      {/* AI-generated Image */}
+      {/* Image */}
       {sender === "ai" && imageUrl && (
         <div className="mt-4">
           <img
             src={imageUrl}
-            alt={`Generated for: ${text.slice(0, 30)}...`}
+            alt="Generated visual"
             className="rounded-lg shadow-lg w-full h-auto object-cover"
           />
         </div>
       )}
 
-      {/* Voice Message */}
+      {/* Audio */}
       {audioUrl && (
         <div className="mt-2">
           <audio controls src={audioUrl} className="w-full" />
         </div>
       )}
 
-      {/* Action Buttons */}
+      {/* Buttons */}
       {sender === "ai" && (
         <div className="mt-4 pt-3 border-t border-gray-100 flex flex-wrap justify-between items-center gap-2">
-          <div className="flex gap-1">
+
+          {/* Copy + Schedule */}
+          <div className="flex gap-2 items-center">
             <button
               onClick={handleCopyClick}
               className={actionButtonClass}
-              title="Copy text to clipboard"
-              aria-label="Copy text to clipboard"
+              title="Copy post"
+              aria-label="Copy post"
             >
               <FaRegCopy size={18} />
             </button>
-            {copied && (
-              <span className="text-xs text-green-600 font-medium ml-1">Copied!</span>
-            )}
+
+            {copied && <span className="text-xs text-green-600 font-medium">Copied!</span>}
+
             {onSchedule && (
               <button
                 onClick={() => onSchedule(text)}
                 className={actionButtonClass}
-                title="Schedule post for later"
-                aria-label="Schedule this post"
+                title="Schedule this post"
+                aria-label="Schedule post"
               >
                 <FaCalendarAlt size={18} />
               </button>
             )}
           </div>
 
-          {/* Share Buttons */}
+          {/* Share */}
           <div className="flex gap-2 items-center">
             <span className="text-xs font-medium text-gray-500 hidden sm:inline">
               Share:
             </span>
-            <ShareButtons post={{ title: text, url: imageUrl || window.location.href }} onNotification={onCopy} />
+
+            <ShareButtons
+              post={{ title: text, url: imageUrl || window.location.href }}
+              onNotification={onCopy}
+            />
           </div>
         </div>
       )}
